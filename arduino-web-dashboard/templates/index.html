@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Arduino Sensor Dashboard</title>
+  <style>
+    :root {
+      --bg-light: #e6f4f3;
+      --panel-bg: #ffffff;
+      --text-dark: #0d1b1e;
+      --text-muted: #555;
+      --primary: #00796b;
+      --accent: #00bfa5;
+      --border: #cde3df;
+      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: var(--bg-light);
+      color: var(--text-dark);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+      animation: fadeIn 1s ease;
+    }
+
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 25px 60px;
+      box-shadow: var(--shadow);
+    }
+
+    header h1 {
+      font-size: 28px;
+      letter-spacing: 0.5px;
+    }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 30px;
+      padding: 40px 60px;
+      animation: fadeIn 1s ease;
+    }
+
+    .card {
+      background: var(--panel-bg);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      padding: 30px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+
+    .value {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--text-dark);
+      transition: all 0.4s ease;
+    }
+
+    .value.animated {
+      color: var(--accent);
+      transform: scale(1.15);
+      animation: glow 0.7s ease-out;
+    }
+
+    .status {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .timestamp {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    footer {
+      background: var(--panel-bg);
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 20px;
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    /* Smooth fade & glow */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes glow {
+      0% { text-shadow: 0 0 10px var(--accent); }
+      100% { text-shadow: none; }
+    }
+
+    @media (max-width: 768px) {
+      header {
+        text-align: center;
+        padding: 20px;
+      }
+      main {
+        padding: 25px;
+      }
+      .card {
+        padding: 25px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Arduino Live Sensor Dashboard</h1>
+  </header>
+
+  <main>
+    <div class="card">
+      <div class="title">Temperature</div>
+      <div class="value temp-value">{{ data.temperature }}</div>
+      <div class="timestamp">Last Updated: {{ data.timestamp }}</div>
+    </div>
+
+    <div class="card">
+      <div class="title">Humidity</div>
+      <div class="value humidity-value">{{ data.humidity }}</div>
+      <div class="timestamp">Last Updated: {{ data.timestamp }}</div>
+    </div>
+
+    <div class="card">
+      <div class="title">Air Quality</div>
+      <div class="value air-value">{{ data.airQuality }}</div>
+      <div class="timestamp">Last Updated: {{ data.timestamp }}</div>
+    </div>
+
+    <div class="card">
+      <div class="title">Smoke Level</div>
+      <div class="value smoke-value">{{ data.smoke }}</div>
+      <div class="timestamp">Last Updated: {{ data.timestamp }}</div>
+    </div>
+
+    <div class="card">
+      <div class="title">Flame Status</div>
+      <div class="value flame-status">{{ data.flame }}</div>
+      <div class="timestamp">Last Updated: {{ data.timestamp }}</div>
+    </div>
+  </main>
+
+  <footer>
+    © {{ data.timestamp[:4] if data.timestamp else "2025" }} | Real-time Environmental Monitoring System
+  </footer>
+
+  <script>
+    function updateDashboard(data) {
+      if (!data) return;
+
+      const updateField = (selector, newValue, unit = "") => {
+        const element = document.querySelector(selector);
+        if (!element) return;
+
+        const currentValue = element.textContent.trim();
+        const updatedValue = newValue + unit;
+
+        if (currentValue !== updatedValue) {
+          element.classList.add("animated");
+          setTimeout(() => {
+            element.textContent = updatedValue;
+            element.classList.remove("animated");
+          }, 700);
+        }
+      };
+
+      // Update basic fields
+      updateField(".temp-value", data.temperature, "°C");
+      updateField(".humidity-value", data.humidity, "%");
+      updateField(".air-value", data.airQuality);
+      updateField(".flame-status", data.flame);
+
+      // 🧠 Smoke detection logic (based on airQuality)
+      const smokeEl = document.querySelector(".smoke-value");
+      if (smokeEl) {
+        const prevText = smokeEl.textContent.trim();
+        let newText = "Normal ";
+        if (data.airQuality > 320) newText = "Smoke Detected ";
+
+        if (prevText !== newText) {
+          smokeEl.classList.add("animated");
+          setTimeout(() => {
+            smokeEl.textContent = newText;
+            smokeEl.classList.remove("animated");
+          }, 700);
+        }
+      }
+
+      // Update all timestamps
+      document.querySelectorAll(".timestamp").forEach(el => {
+        el.textContent = "Last Updated: " + data.timestamp;
+      });
+    }
+
+    // Fetch new data every 5 seconds
+    setInterval(() => {
+      fetch("/latest")
+        .then(res => res.json())
+        .then(data => updateDashboard(data))
+        .catch(err => console.error("Fetch error:", err));
+    }, 5000);
+  </script>
+</body>
+</html>
