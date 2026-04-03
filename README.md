@@ -144,7 +144,11 @@ http://127.0.0.1:5000
 
 ## Screenshots
 
+<img width="2868" height="1362" alt="image" src="https://github.com/user-attachments/assets/c916bae5-4b86-40a7-b4f5-113eb4acefda" />
 
+<img width="2836" height="1327" alt="image" src="https://github.com/user-attachments/assets/007753e1-8501-4634-9fab-74d3aec9d1ca" />
+
+<img width="2868" height="1139" alt="image" src="https://github.com/user-attachments/assets/20d43814-fff2-4c6f-b6c2-acb90c2038f1" />
 
 ---
 
